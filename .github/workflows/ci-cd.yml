@@ -38,7 +38,7 @@ jobs:
           sleep 30  # Ajusta el tiempo según sea necesario
 
       - name: Run Postman tests
-        run: newman run your_collection.json --env-var "base_url=http://localhost:8080"
+        run: newman run "./src/test/postman/test/CI CD test.postman_collection.json" -e "./src/test/postman/enviroment/test-environment.json" --env-var "base_url=http://localhost:8080"
 
       - name: Stop Spring Boot application
         run: |
