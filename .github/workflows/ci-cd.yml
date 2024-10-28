@@ -32,10 +32,12 @@ jobs:
           SPRING_DATASOURCE_USERNAME: sa
           SPRING_DATASOURCE_PASSWORD: password
 
-      - name: Wait for the server to start
+      - name: Check if application is up
         run: |
-          echo "Waiting for the server to start..."
-          sleep 30  # Ajusta el tiempo según sea necesario
+          until curl -s http://localhost:8080/hello; do
+            echo "Waiting for application to start..."
+            sleep 5
+          done
 
       - name: Run Postman tests
         run: newman run "./src/test/postman/test/CI CD test.postman_collection.json" -e "./src/test/postman/enviroment/test-environment.json" --env-var "base_url=http://localhost:8080"
