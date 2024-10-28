@@ -25,15 +25,22 @@ jobs:
       - name: Build with Maven
         run: mvn clean install -DskipTests
 
-      - name: Run tests with H2
-        run: mvn test -Dspring.profiles.active=test
+      - name: Start Spring Boot application
+        run: mvn spring-boot:run &
         env:
-          SPRING_DATASOURCE_URL: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+          SPRING_DATASOURCE_URL: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
           SPRING_DATASOURCE_USERNAME: sa
           SPRING_DATASOURCE_PASSWORD: password
 
-      - name: Install Newman
-        run: npm install -g newman
+      - name: Wait for the server to start
+        run: |
+          echo "Waiting for the server to start..."
+          sleep 30  # Ajusta el tiempo según sea necesario
 
       - name: Run Postman tests
-        run: newman run "src/test/postman/test/CI CD test.postman_collection.json" -e "src/test/postman/enviroment/test-environment.json"
+        run: newman run your_collection.json --env-var "base_url=http://localhost:8080"
+
+      - name: Stop Spring Boot application
+          run: |
+            echo "Stopping Spring Boot application..."
+            kill $(lsof -t -i:8080)  # Detiene el proceso que está escuchando en el puerto 8080
