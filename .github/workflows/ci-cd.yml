@@ -23,24 +23,17 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Maven
-        run: mvn clean package -DskipTests
+        run: mvn clean install -DskipTests
 
-      - name: Start Spring Boot Application
-        run: java -jar target/*.jar &
+      - name: Run tests with H2
+        run: mvn test -Dspring.profiles.active=test
         env:
-          SPRING_PROFILES_ACTIVE: test
-          SPRING_DATASOURCE_URL: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+          SPRING_DATASOURCE_URL: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
           SPRING_DATASOURCE_USERNAME: sa
           SPRING_DATASOURCE_PASSWORD: password
 
-      - name: Wait for Application to Start
-        run: |
-          echo "Waiting for Spring Boot application to start..."
-          sleep 30  # Ajusta el tiempo según sea necesario o usa un comando de espera específica
+      - name: Install Newman
+        run: npm install -g newman
 
-      - name: Run Postman Tests
-        uses: actions/postman-cli-run@v1 # Requiere que tengas un archivo Postman Collection y ambiente configurado
-        with:
-          collection: src/test/postman/test
-          environment: src/test/postman/enviroment/your-test-environment.json
-          reporters: cli,json
+      - name: Run Postman tests
+        run: newman run path/to/your/collection.json -e path/to/your/test-environment.json
