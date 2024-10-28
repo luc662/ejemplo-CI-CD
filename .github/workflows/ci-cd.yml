@@ -26,11 +26,7 @@ jobs:
         run: mvn clean install -DskipTests
 
       - name: Start Spring Boot application
-        run: mvn spring-boot:run &
-        env:
-          SPRING_DATASOURCE_URL: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-          SPRING_DATASOURCE_USERNAME: sa
-          SPRING_DATASOURCE_PASSWORD: password
+        run: mvn spring-boot:run -Dspring.profiles.active=test &
 
       - name: Check if application is up
         run: |
@@ -40,9 +36,11 @@ jobs:
           done
 
       - name: Run Postman tests
-        run: newman run "./src/test/postman/test/CI CD test.postman_collection.json" -e "./src/test/postman/enviroment/test-environment.json" --env-var "base_url=http://localhost:8080"
+        run: newman run "./src/test/postman/test/CI CD test.postman_collection.json" \
+          -e "./src/test/postman/enviroment/test-environment.json" \
+          --env-var "base_url=http://localhost:8080"
 
       - name: Stop Spring Boot application
         run: |
           echo "Stopping Spring Boot application..."
-          kill $(lsof -t -i:8080)  # Detiene el proceso que está escuchando en el puerto 8080
+          kill $(lsof -t -i:8080) || true  # Asegúrate de manejar el caso si no hay procesos
